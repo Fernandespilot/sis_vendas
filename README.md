@@ -53,69 +53,12 @@ As histórias de usuário (User Stories) do sistema estão detalhadas no arquivo
 erDiagram
     CLIENTE ||--o{ PEDIDO : FAZ
     CLIENTE }o--|| MUNICIPIO : RESIDE
-    CLIENTE ||--|{ PROMOTOR_VENDA : ATENDE
-    PROMOTOR_VENDA ||--|{ MUNICIPIO : ATENDE
+    CLIENTE ||--|{ PROMOTOR_VENDA : ATENDIDO_POR
+    PROMOTOR_VENDA ||--|{ MUNICIPIO : COBRE
     PROMOTOR_VENDA ||--o{ PEDIDO : REGISTRA
-    MUNICIPIO ||--o{ AREA_COBERTURA : INCLUI
-
-    PEDIDO ||--o{ ITEM_PEDIDO : CONTEM
+    PEDIDO ||--o{ ITEM_PEDIDO : CONTÉM
     ITEM_PEDIDO }|--|| PRODUTO : REFERE
     PRODUTO ||--|| GRUPO_PRODUTO : PERTENCE
-
-    CLIENTE {
-        int id_cliente
-        string inscricao_estadual
-        string nome
-        string CNPJ
-        string logradouro
-        int numero
-        string bairro
-        string CEP
-    }
-
-    MUNICIPIO {
-        int id_municipio
-        string nome_municipio
-        string UF
-    }
-
-    PROMOTOR_VENDA {
-        int id_promotor_venda
-        string nome_promotor
-    }
-
-    PEDIDO {
-        int id_pedido
-        date dt_emissao
-        string status_pedido
-        date dt_entrega
-        float vlr_total
-    }
-
-    ITEM_PEDIDO {
-        int qtd_produto
-        float vlr_unitario
-        float subtotal_produtos
-    }
-
-    PRODUTO {
-        int id_produto
-        float perc_comissao
-        float perc_promocao
-        int estoque
-        float imposto_produto
-    }
-
-    GRUPO_PRODUTO {
-        int id_gp_produto
-        string nome_gp_produto
-        float perc_comissao
-        float perc_promocao
-    }
-
-    AREA_COBERTURA {
-        int id
-    }
 ```
 
 ### Modelo Lógico
