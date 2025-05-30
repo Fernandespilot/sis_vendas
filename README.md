@@ -48,9 +48,6 @@ As histórias de usuário (User Stories) do sistema estão detalhadas no arquivo
 > Apresente aqui o Diagrama Entidade-Relacionamento (DER), que representa a modelagem dos dados do sistema.
 
 ### Modelo Conceitual
----
-title: Modelo Entidade Relacionamento - Vendas
----
 
 ```mermaid
 erDiagram
@@ -119,6 +116,7 @@ erDiagram
     AREA_COBERTURA {
         int id
     }
+```
 
 ### Modelo Lógico
 ![Diagrama Entidade Relacionamento Lógico](document/img/der-logico.jpg)
