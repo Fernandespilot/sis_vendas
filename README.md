@@ -45,10 +45,6 @@ As histórias de usuário (User Stories) do sistema estão detalhadas no arquivo
 
 ## 🧩 Modelo Conceitual DER
 
-> Apresente aqui o Diagrama Entidade-Relacionamento (DER), que representa a modelagem dos dados do sistema.
-
-### Modelo Conceitual
-
 ```mermaid
 erDiagram
     CLIENTE ||--o{ PEDIDO : FAZ
