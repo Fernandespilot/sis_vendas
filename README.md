@@ -48,71 +48,78 @@ As histórias de usuário (User Stories) do sistema estão detalhadas no arquivo
 > Apresente aqui o Diagrama Entidade-Relacionamento (DER), que representa a modelagem dos dados do sistema.
 
 ### Modelo Conceitual
+---
+title: Modelo Entidade Relacionamento - Vendas
+---
+
 ```mermaid
 erDiagram
     CLIENTE ||--o{ PEDIDO : FAZ
-    CLIENTE ||--o{ ATENDE : participa
+    CLIENTE }o--|| MUNICIPIO : RESIDE
+    CLIENTE ||--|{ PROMOTOR_VENDA : ATENDE
+    PROMOTOR_VENDA ||--|{ MUNICIPIO : ATENDE
+    PROMOTOR_VENDA ||--o{ PEDIDO : REGISTRA
+    MUNICIPIO ||--o{ AREA_COBERTURA : INCLUI
+
+    PEDIDO ||--o{ ITEM_PEDIDO : CONTEM
+    ITEM_PEDIDO }|--|| PRODUTO : REFERE
+    PRODUTO ||--|| GRUPO_PRODUTO : PERTENCE
+
     CLIENTE {
-        int id_cliente PK
+        int id_cliente
         string inscricao_estadual
         string nome
         string CNPJ
-        string endereco
         string logradouro
-        string numero
+        int numero
         string bairro
         string CEP
     }
-    
-    MUNICIPIO ||--|{ CLIENTE : RESIDE
+
     MUNICIPIO {
-        string UF
-        int id_municipio PK
+        int id_municipio
         string nome_municipio
+        string UF
     }
 
-    PROMOTOR_VENDA ||--o{ PEDIDO : REGISTRA
-    PROMOTOR_VENDA ||--o{ AREA_COBERTURA : ATENDE
     PROMOTOR_VENDA {
-        int id_promotor_venda PK
+        int id_promotor_venda
         string nome_promotor
     }
 
-    PEDIDO ||--|{ ITEM_PEDIDO : CONTEM
     PEDIDO {
-        int id_pedido PK
-        decimal vlr_total
+        int id_pedido
         date dt_emissao
         string status_pedido
         date dt_entrega
-    }
-
-    PRODUTO ||--|{ ITEM_PEDIDO : possui
-    PRODUTO ||--|| GRUPO_PRODUTO : PERTENCE
-    PRODUTO {
-        int id_produto PK
-        decimal perc_comissao
-        decimal perc_promocao
-        int estoque
-        decimal imposto_produto
-    }
-
-    GRUPO_PRODUTO {
-        int id_gp_produto PK
-        string nome_gp_produto
-        decimal perc_comissao
-        decimal perc_promocao
+        float vlr_total
     }
 
     ITEM_PEDIDO {
-        decimal subtotal_produtos
-        decimal vlr_unitario
         int qtd_produto
+        float vlr_unitario
+        float subtotal_produtos
+    }
+
+    PRODUTO {
+        int id_produto
+        float perc_comissao
+        float perc_promocao
+        int estoque
+        float imposto_produto
+    }
+
+    GRUPO_PRODUTO {
+        int id_gp_produto
+        string nome_gp_produto
+        float perc_comissao
+        float perc_promocao
     }
 
     AREA_COBERTURA {
+        int id
     }
-```
+
 ### Modelo Lógico
 ![Diagrama Entidade Relacionamento Lógico](document/img/der-logico.jpg)
 
