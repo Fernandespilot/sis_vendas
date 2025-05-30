@@ -48,8 +48,71 @@ As histórias de usuário (User Stories) do sistema estão detalhadas no arquivo
 > Apresente aqui o Diagrama Entidade-Relacionamento (DER), que representa a modelagem dos dados do sistema.
 
 ### Modelo Conceitual
-![Diagrama Entidade Relacionamento Conceitual](document/img/der-conceitual.jpg)
+```mermaid
+erDiagram
+    CLIENTE ||--o{ PEDIDO : FAZ
+    CLIENTE ||--o{ ATENDE : participa
+    CLIENTE {
+        int id_cliente PK
+        string inscricao_estadual
+        string nome
+        string CNPJ
+        string endereco
+        string logradouro
+        string numero
+        string bairro
+        string CEP
+    }
+    
+    MUNICIPIO ||--|{ CLIENTE : RESIDE
+    MUNICIPIO {
+        string UF
+        int id_municipio PK
+        string nome_municipio
+    }
 
+    PROMOTOR_VENDA ||--o{ PEDIDO : REGISTRA
+    PROMOTOR_VENDA ||--o{ AREA_COBERTURA : ATENDE
+    PROMOTOR_VENDA {
+        int id_promotor_venda PK
+        string nome_promotor
+    }
+
+    PEDIDO ||--|{ ITEM_PEDIDO : CONTEM
+    PEDIDO {
+        int id_pedido PK
+        decimal vlr_total
+        date dt_emissao
+        string status_pedido
+        date dt_entrega
+    }
+
+    PRODUTO ||--|{ ITEM_PEDIDO : possui
+    PRODUTO ||--|| GRUPO_PRODUTO : PERTENCE
+    PRODUTO {
+        int id_produto PK
+        decimal perc_comissao
+        decimal perc_promocao
+        int estoque
+        decimal imposto_produto
+    }
+
+    GRUPO_PRODUTO {
+        int id_gp_produto PK
+        string nome_gp_produto
+        decimal perc_comissao
+        decimal perc_promocao
+    }
+
+    ITEM_PEDIDO {
+        decimal subtotal_produtos
+        decimal vlr_unitario
+        int qtd_produto
+    }
+
+    AREA_COBERTURA {
+    }
+```
 ### Modelo Lógico
 ![Diagrama Entidade Relacionamento Lógico](document/img/der-logico.jpg)
 
