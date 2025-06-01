@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastrar Produto{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Cadastrar Produto</h1>
+
+<form method="post" enctype="multipart/form-data" novalidate aria-label="Formulário para cadastrar produto" id="productForm" autocomplete="off">
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+      <div class="form-errors" role="alert" tabindex="0">
+        <ul>
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    
+    {% for field in form %}
+      <div class="form-group" data-field-name="{{ field.name }}">
+        <label for="{{ field.id_for_label }}">
+          {{ field.label }}
+          {% if field.field.required %} <span aria-hidden="true" class="required">*</span>{% endif %}
+        </label>
+        {{ field }}
+        {% if field.help_text %}
+          <small id="{{ field.id_for_label }}-help" class="help-text">{{ field.help_text }}</small>
+        {% endif %}
+        <div class="validation-message" aria-live="assertive" id="{{ field.id_for_label }}-error"></div>
+
+        {% if field.name == 'imagem' %}
+          <div class="img-preview-container" role="region" aria-live="polite" aria-atomic="true" style="margin-top: 10px;">
+            <img id="imgPreview" alt="Preview da imagem selecionada" style="max-width: 100%; max-height: 200px; display:none; border-radius:6px; box-shadow:0 0 6px #ccc;">
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    
+    <button type="submit" class="btn btn-primary" id="submitBtn" aria-live="polite" aria-busy="false">
+        <span class="btn-text">Salvar</span>
+        <span class="loader" aria-hidden="true"></span>
+    </button>
+</form>
+
+<a href="{% url 'lista_produtos' %}" class="btn btn-link" aria-label="Voltar para a lista de produtos" style="margin-top: 1rem; display: inline-block;">
+    Voltar para a lista de produtos
+</a>
+
+<style>
+  /* Reset, layout e tipografia */
+  body {
+    background: #f9fafb;
+    color: #222;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .page-title {
+    font-size: 2.4rem;
+    margin-bottom: 1.5rem;
+  }
+  form {
+    max-width: 520px;
+    background: #fff;
+    padding: 2rem 2.5rem;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    font-size: 1rem;
+  }
+  .form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  label {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .required {
+    color: #e53e3e;
+    margin-left: 0.15rem;
+  }
+  input, select, textarea {
+    font-size: 1rem;
+    padding: 0.65rem 0.9rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #999;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: #38a169;
+    box-shadow: 0 0 6px #38a169aa;
+    outline: none;
+  }
+
+  /* Validação */
+  .form-group.valid input,
+  .form-group.valid select,
+  .form-group.valid textarea {
+    border-color: #38a169;
+  }
+  .form-group.valid .validation-message::before {
+    content: "✔️";
+    margin-right: 6px;
+    color: #38a169;
+  }
+  .form-group.invalid input,
+  .form-group.invalid select,
+  .form-group.invalid textarea {
+    border-color: #e53e3e;
+  }
+  .form-group.invalid .validation-message::before {
+    content: "⚠️";
+    margin-right: 6px;
+    color: #e53e3e;
+  }
+  .help-text {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 0.3rem;
+  }
+  .validation-message {
+    font-size: 0.85rem;
+    color: #e53e3e;
+    margin-top: 0.25rem;
+    min-height: 1.3em;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .form-group.invalid .validation-message {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Erros globais */
+  .form-errors {
+    background-color: #fed7d7;
+    color: #9b2c2c;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    box-shadow: inset 0 0 8px #f56565aa;
+  }
+  .form-errors ul {
+    margin: 0;
+    padding-left: 1.3rem;
+  }
+
+  /* Botões */
+  .btn {
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 0.75rem 1.4rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+  }
+  .btn-primary {
+    background-color: #38a169;
+    color: white;
+  }
+  .btn-primary:hover,
+  .btn-primary:focus {
+    background-color: #2f855a;
+    outline: none;
+    box-shadow: 0 0 8px #2f855aaa;
+  }
+  .btn-primary:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .btn-link {
+    background: none;
+    border: none;
+    color: #38a169;
+    padding: 0;
+    font-size: 1rem;
+  }
+  .btn-link:hover,
+  .btn-link:focus {
+    text-decoration: underline;
+    outline: none;
+  }
+
+  /* Loader */
+  .loader {
+    border: 3px solid transparent;
+    border-top: 3px solid white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    margin-left: 0.8rem;
+    animation: spin 1s linear infinite;
+    display: none;
+  }
+  .btn-primary.loading .loader {
+    display: inline-block;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Responsividade */
+  @media (max-width: 600px) {
+    form {
+      padding: 1.5rem 1.5rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('productForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+
+    // Preview da imagem
+    const imgInput = form.querySelector('input[type="file"][name="imagem"]');
+    const imgPreview = document.getElementById('imgPreview');
+    if (imgInput) {
+      imgInput.addEventListener('change', () => {
+        const file = imgInput.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = e => {
+            imgPreview.src = e.target.result;
+            imgPreview.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        } else {
+          imgPreview.style.display = 'none';
+          imgPreview.src = '';
+        }
+      });
+    }
+
+    // Validação em tempo real e no envio
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      input.addEventListener('input', () => validateField(input));
+      input.addEventListener('blur', () => validateField(input));
+    });
+
+    function validateField(input) {
+      const group = input.closest('.form-group');
+      const messageEl = group.querySelector('.validation-message');
+      let valid = true;
+      let message = '';
+
+      if (input.hasAttribute('required') && !input.value.trim()) {
+        valid = false;
+        message = 'Este campo é obrigatório.';
+      } else if (input.type === 'email' && input.value) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!re.test(input.value)) {
+          valid = false;
+          message = 'Por favor, insira um e-mail válido.';
+        }
+      }
+
+      if (valid) {
+        group.classList.remove('invalid');
+        group.classList.add('valid');
+        messageEl.textContent = '';
+      } else {
+        group.classList.remove('valid');
+        group.classList.add('invalid');
+        messageEl.textContent = message;
+      }
+      return valid;
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      inputs.forEach(input => {
+        if (!validateField(input)) {
+          valid = false;
+        }
+      });
+
+      if (!valid) {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        submitBtn.removeAttribute('aria-busy');
+        btnText.textContent = 'Salvar';
+
+        const firstError = form.querySelector('.form-group.invalid input, .form-group.invalid select, .form-group.invalid textarea');
+        if (firstError) firstError.focus();
+        return;
+      }
+
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+      submitBtn.setAttribute('aria-busy', 'true');
+      btnText.textContent = 'Enviando...';
+
+      form.submit();
+    });
+  });
+</script>
+{% endblock %}
