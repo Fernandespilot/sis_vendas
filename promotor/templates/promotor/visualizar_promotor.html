@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Dados do Promotor</h2>
+  <ul>
+    <li><strong>Nome:</strong> {{ promotor.nome }}</li>
+    <li><strong>Email:</strong> {{ promotor.email }}</li>
+    <li><strong>Municípios Cobertos:</strong> {{ promotor.municipios_cobertos }}</li>
+  </ul>
+  <a href="{% url 'editar_promotor' promotor.pk %}" class="btn btn-primary">Editar</a>
+  <a href="{% url 'lista_promotores' %}" class="btn btn-secondary">Voltar</a>
+{% endblock %}

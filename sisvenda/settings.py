@@ -1,3 +1,7 @@
+# Configuração do template de login customizado
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/home/'
+LOGOUT_REDIRECT_URL = '/login/'
 """
 Django settings for sisvenda project.
 
@@ -41,6 +45,8 @@ INSTALLED_APPS = [
     'produto',
     'venda',
     'core',
+    'promotor',
+    'users',
 ]
 
 MIDDLEWARE = [
