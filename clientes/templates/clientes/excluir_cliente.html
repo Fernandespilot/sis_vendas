@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Excluir Cliente</h2>
+<form method="post" style="margin-bottom: 24px;">
+    {% csrf_token %}
+    <table style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+        <thead>
+            <tr style="background:#f2f2f2;">
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Telefone</th>
+                <th>CNPJ</th>
+                <th>IE</th>
+                <th>Endereço</th>
+                <th>Município</th>
+                <th>UF</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ cliente.nome }}</td>
+                <td>{{ cliente.email }}</td>
+                <td>{{ cliente.telefone }}</td>
+                <td>{{ cliente.cnpj }}</td>
+                <td>{{ cliente.ie }}</td>
+                <td>{{ cliente.endereco }}</td>
+                <td>{{ cliente.municipio }}</td>
+                <td>{{ cliente.uf }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <p style="margin-bottom:18px;">Tem certeza que deseja excluir este cliente?</p>
+    <button type="submit" style="background:#d32f2f;color:#fff;padding:8px 18px;border:none;border-radius:4px;">Confirmar</button>
+    <a href="{% url 'lista_clientes' %}" style="margin-left:12px;color:#19916a;text-decoration:none;">Cancelar</a>
+</form>
+{% endblock %}

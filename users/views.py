@@ -1,10 +1,9 @@
-from django.contrib.auth.views import LogoutView
+from django.contrib import auth
 
-# Permitir logout via GET
-class CustomLogoutView(LogoutView):
-    next_page = '/login/'
-    def get(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
+# Função de logout baseada no exemplo do usuário
+def logout(request):
+    auth.logout(request)
+    return redirect('login')
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
@@ -38,9 +37,41 @@ class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
     authentication_form = EmailAuthenticationForm
 
-class CustomPasswordChangeView(PasswordChangeView):
-    template_name = 'registration/password_change_form.html'
-    success_url = reverse_lazy('password_change_done')
+
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib import messages
+
+@login_required
+def password_change(request):
+    if request.method == 'POST':
+        if request.POST.get('clear_success'):
+            request.session.pop('show_password_success', None)
+            return redirect('password_change')
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
+        requisitos = []
+        if new_password1:
+            if len(new_password1) >= 8:
+                requisitos.append('comprimento')
+            if any(c.isdigit() for c in new_password1):
+                requisitos.append('digito')
+            if any(c.isupper() for c in new_password1):
+                requisitos.append('maiuscula')
+            if any(c.islower() for c in new_password1):
+                requisitos.append('minuscula')
+        if new_password1 != new_password2:
+            messages.error(request, 'Os campos Nova Senha e Confirmar Senha devem ser iguais.')
+        elif not all(r in requisitos for r in ['comprimento','digito','maiuscula','minuscula']):
+            messages.error(request, 'A senha deve ter pelo menos 8 caracteres, incluir dígitos, letras maiúsculas e minúsculas.')
+        elif form.is_valid():
+            form.save()
+            messages.success(request, 'Senha alterada com sucesso!')
+            request.session['show_password_success'] = True
+            return redirect('home')
+    else:
+        form = PasswordChangeForm(user=request.user)
+    return render(request, 'registration/password_change_form.html', {'form': form})
 
 @login_required
 def perfil(request):
