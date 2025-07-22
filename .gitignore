@@ -1,0 +1,23 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+
+# Migrations (ignorando todas as pastas de migração)
+**/migrations/
+**/migrations/*.pyc
+
+# Ambiente virtual (virtualenv)
+venv/
+.env
+
+# Arquivos temporários
+*.log
+*.pot
+*.pyc
+
+# VSCode
+.vscode/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db

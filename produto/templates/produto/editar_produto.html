@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Produto - {{ produto.nome }}{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem; color: #222; font-weight: 700; font-size: 2.4rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    Editar Produto: {{ produto.nome }}
+</h1>
+
+<form method="post" enctype="multipart/form-data" class="form-edit-produto" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+                {% if field.field.required %}
+                    <span aria-label="Obrigatório" class="required">*</span>
+                {% endif %}
+            </label>
+            {{ field }}
+            {% if field.help_text %}
+                <small class="help-text">{{ field.help_text }}</small>
+            {% endif %}
+            {% if field.errors %}
+                <div role="alert" class="field-error">{{ field.errors|striptags }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <button type="submit" class="btn-submit">Salvar Alterações</button>
+</form>
+
+<a href="{% url 'lista_produtos' %}" class="btn-back">&larr; Voltar para a lista de produtos</a>
+
+<style>
+    /* Container do form */
+    .form-edit-produto {
+        max-width: 600px;
+        background: #fff;
+        padding: 2.5rem 3rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        transition: box-shadow 0.3s ease;
+    }
+    .form-edit-produto:hover {
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    }
+    
+    /* Cada grupo de campo */
+    .form-group {
+        margin-bottom: 1.6rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    label {
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 0.4rem;
+        font-size: 1.1rem;
+    }
+    .required {
+        color: #d93025;
+        margin-left: 0.2rem;
+        font-weight: 700;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    input[type="email"],
+    select,
+    textarea {
+        padding: 0.65rem 1rem;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        outline-offset: 2px;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="file"]:focus,
+    input[type="email"]:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #4CAF50;
+        box-shadow: 0 0 5px #4CAF50;
+    }
+
+    .help-text {
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+        font-style: italic;
+    }
+
+    .field-error {
+        margin-top: 0.4rem;
+        color: #d93025;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* Botão submit */
+    .btn-submit {
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 28px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
+        user-select: none;
+    }
+    .btn-submit:hover,
+    .btn-submit:focus {
+        background-color: #388E3C;
+        box-shadow: 0 8px 20px rgba(56, 142, 60, 0.6);
+        transform: translateY(-2px);
+        outline: none;
+    }
+    .btn-submit:active {
+        transform: translateY(1px);
+        box-shadow: 0 4px 12px rgba(56, 142, 60, 0.4);
+    }
+
+    /* Link de voltar */
+    .btn-back {
+        display: inline-block;
+        margin-top: 30px;
+        color: #4CAF50;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: color 0.3s ease;
+    }
+    .btn-back:hover,
+    .btn-back:focus {
+        color: #388E3C;
+        text-decoration: underline;
+        outline: none;
+    }
+
+    /* Responsividade básica */
+    @media (max-width: 640px) {
+        .form-edit-produto {
+            padding: 1.5rem 2rem;
+            width: 90%;
+        }
+    }
+</style>
+
+<script>
+    // Foco no primeiro input para melhor UX
+    document.addEventListener('DOMContentLoaded', () => {
+        const firstInput = document.querySelector('.form-edit-produto input, .form-edit-produto select, .form-edit-produto textarea');
+        if (firstInput) firstInput.focus();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,499 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Produtos{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  /* Container e layout */
+  .container { max-width: 1200px; margin: 80px auto 40px; padding: 0 20px; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+  .btn-novo-produto { background-color: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+  .btn-novo-produto:hover { background-color: #388e3c; }
+
+  /* Filtro */
+  .filter-form {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-form input {
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    min-width: 150px;
+  }
+  .filter-form button {
+    background-color: #2196F3;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .filter-form button:hover {
+    background-color: #1976d2;
+  }
+  .filter-form button:disabled {
+    background-color: #90caf9;
+    cursor: not-allowed;
+  }
+  .filter-form .btn-limpar {
+    background-color: #777;
+  }
+  .filter-form .btn-limpar:hover {
+    background-color: #555;
+  }
+
+  /* Grid e Cards */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    outline-offset: 2px;
+  }
+  .card:focus {
+    outline: 3px solid #2196F3;
+  }
+  .card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+  .card-content {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+  }
+  .card-price {
+    color: #4CAF50;
+    font-weight: 600;
+  }
+  .card-actions a,
+  .card-actions button {
+    background: none;
+    border: none;
+    color: #2196F3;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 10px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+  }
+  .card-actions a:hover,
+  .card-actions button:hover {
+    color: #0b79d0;
+  }
+  .card-actions a {
+    type: button; /* embora type não seja padrão em a, não prejudica */
+  }
+  .card-actions button {
+    type: button; /* para evitar submit acidental */
+  }
+
+  /* Paginação */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .pagination a,
+  .pagination span {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: #333;
+    text-decoration: none;
+    user-select: none;
+  }
+  .pagination .current {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+  }
+  .pagination a:hover {
+    background-color: #eee;
+  }
+
+  /* Modal */
+  #confirmModal {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+  }
+  #confirmModal[aria-hidden="true"] {
+    display: none;
+  }
+  #confirmModal[aria-hidden="false"] {
+    display: flex;
+  }
+  #confirmModal .modal-content {
+    background: #fff;
+    padding: 25px 35px;
+    border-radius: 8px;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+  }
+  #confirmModal h2 {
+    margin-bottom: 15px;
+  }
+  #confirmModal p {
+    font-size: 1.1rem;
+    color: #555;
+  }
+  #confirmModal .modal-buttons {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  #confirmModal button {
+    padding: 10px 20px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+  #confirmModal #confirmYes {
+    background-color: #d32f2f;
+    color: white;
+  }
+  #confirmModal #confirmYes:hover {
+    background-color: #b71c1c;
+  }
+  #confirmModal #confirmNo {
+    background-color: #bbb;
+    color: #333;
+  }
+  #confirmModal #confirmNo:hover {
+    background-color: #999;
+  }
+
+  /* Loader */
+  #loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4CAF50;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 10000;
+    display: none;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+  }
+
+  /* Feedback message */
+  #feedbackMessage {
+    text-align: center;
+    font-size: 1rem;
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    display: none;
+    user-select: none;
+    outline: none;
+  }
+  #feedbackMessage.success {
+    background-color: #4CAF50;
+    color: white;
+  }
+  #feedbackMessage.error {
+    background-color: #d32f2f;
+    color: white;
+  }
+</style>
+
+<div class="container">
+  <div class="header">
+    <h1>Lista de Produtos</h1>
+    <a href="{% url 'cadastrar_produto' %}" class="btn-novo-produto" aria-label="Cadastrar novo produto">
+      <i class="fas fa-plus" aria-hidden="true"></i> Novo Produto
+    </a>
+  </div>
+
+  <!-- Filtro -->
+  <form class="filter-form" method="get" role="search" aria-label="Filtrar produtos">
+    <input type="text" name="nome" placeholder="Buscar por nome" value="{{ nome|default_if_none:'' }}" aria-label="Buscar por nome">
+    <input type="number" name="preco_min" step="0.01" placeholder="Preço mínimo" value="{{ preco_min|default_if_none:'' }}" aria-label="Preço mínimo">
+    <input type="number" name="preco_max" step="0.01" placeholder="Preço máximo" value="{{ preco_max|default_if_none:'' }}" aria-label="Preço máximo">
+
+    <button type="submit" aria-label="Filtrar produtos" id="btnFiltrar" disabled>
+      <i class="fas fa-search" aria-hidden="true"></i> Filtrar
+    </button>
+
+    <button type="button" class="btn-limpar" id="btnLimpar" aria-label="Limpar filtros">
+      <i class="fas fa-times" aria-hidden="true"></i> Limpar
+    </button>
+  </form>
+
+  {% if page_obj.paginator.count > 0 %}
+    <p aria-live="polite" style="text-align:center; margin-bottom:15px;">
+      {{ page_obj.paginator.count }} produto{{ page_obj.paginator.count|pluralize }} encontrado{{ page_obj.paginator.count|pluralize }}
+    </p>
+  {% endif %}
+
+  {% if page_obj %}
+    <div class="grid" role="list" aria-label="Lista de produtos">
+      {% for produto in page_obj %}
+        <article class="card" role="listitem" tabindex="0" aria-labelledby="produto-{{ produto.id }}-nome">
+          <img src="{{ produto.imagem.url }}" alt="Imagem do produto {{ produto.nome }}" loading="lazy" />
+          <div class="card-content">
+            <div>
+              <h2 class="card-title" id="produto-{{ produto.id }}-nome">{{ produto.nome }}</h2>
+              <p class="card-price">R$ {{ produto.preco }}</p>
+            </div>
+            <div class="card-actions">
+              <a href="{% url 'editar_produto' produto.id %}" aria-label="Editar produto {{ produto.nome }}" type="button">
+                <i class="fas fa-edit" aria-hidden="true"></i> Editar
+              </a>
+              <button class="btn-excluir" data-id="{{ produto.id }}" aria-label="Excluir produto {{ produto.nome }}" type="button">
+                <i class="fas fa-trash" aria-hidden="true"></i> Excluir
+              </button>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+    <!-- Paginação melhorada -->
+    <nav class="pagination" aria-label="Navegação da página de produtos">
+      {% with total_pages=page_obj.paginator.num_pages current=page_obj.number %}
+        {% if total_pages > 1 %}
+          <!-- Página 1 -->
+          {% if current > 3 %}
+            <a href="?page=1{% if nome %}&nome={{ nome }}{% endif %}{% if preco_min %}&preco_min={{ preco_min }}{% endif %}{% if preco_max %}&preco_max={{ preco_max }}{% endif %}" aria-label="Ir para página 1">1</a>
+            {% if current > 4 %}<span aria-hidden="true">...</span>{% endif %}
+          {% endif %}
+
+          <!-- Páginas próximas -->
+          {% for p in page_obj.paginator.page_range %}
+            {% if p >= current|add:'-2' and p <= current|add:'2' %}
+              {% if p == current %}
+                <span class="current" aria-current="page">{{ p }}</span>
+              {% else %}
+                <a href="?page={{ p }}{% if nome %}&nome={{ nome }}{% endif %}{% if preco_min %}&preco_min={{ preco_min }}{% endif %}{% if preco_max %}&preco_max={{ preco_max }}{% endif %}" aria-label="Ir para página {{ p }}">{{ p }}</a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+
+          <!-- Última página -->
+          {% if current < total_pages|add:'-2' %}
+            {% if current < total_pages|add:'-3' %}<span aria-hidden="true">...</span>{% endif %}
+            <a href="?page={{ total_pages }}{% if nome %}&nome={{ nome }}{% endif %}{% if preco_min %}&preco_min={{ preco_min }}{% endif %}{% if preco_max %}&preco_max={{ preco_max }}{% endif %}" aria-label="Ir para última página">{{ total_pages }}</a>
+          {% endif %}
+        {% endif %}
+      {% endwith %}
+    </nav>
+  {% else %}
+    <p>Nenhum produto encontrado.</p>
+  {% endif %}
+</div>
+
+<!-- Modal Confirmar Exclusão -->
+<div id="confirmModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle" aria-describedby="modalDesc" tabindex="-1">
+  <div class="modal-content">
+    <h2 id="modalTitle">Confirmar exclusão</h2>
+    <p id="modalDesc">Tem certeza que deseja excluir este produto?</p>
+    <div class="modal-buttons">
+      <button id="confirmYes" type="button">Sim, excluir</button>
+      <button id="confirmNo" type="button">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loader -->
+<div id="loader" role="status" aria-live="polite" aria-label="Carregando"></div>
+
+<!-- Feedback -->
+<div id="feedbackMessage" role="alert" tabindex="-1"></div>
+
+<script>
+  // --- Habilita o botão filtrar apenas se algum filtro estiver preenchido ---
+  const btnFiltrar = document.getElementById('btnFiltrar');
+  const inputsFiltro = document.querySelectorAll('.filter-form input');
+  const btnLimpar = document.getElementById('btnLimpar');
+
+  function checarFiltro() {
+    const hasValue = Array.from(inputsFiltro).some(input => input.value.trim() !== '');
+    btnFiltrar.disabled = !hasValue;
+  }
+  inputsFiltro.forEach(input => input.addEventListener('input', checarFiltro));
+  btnLimpar.addEventListener('click', () => {
+    inputsFiltro.forEach(input => input.value = '');
+    btnFiltrar.disabled = true;
+  });
+  checarFiltro(); // para o estado inicial
+
+  // --- Modal ---
+  const modal = document.getElementById('confirmModal');
+  const btnYes = document.getElementById('confirmYes');
+  const btnNo = document.getElementById('confirmNo');
+  let produtoIdParaExcluir = null;
+  let lastFocusedElement = null;
+
+  // Função para abrir modal e focar no botão "Sim"
+  function showModal(id) {
+    produtoIdParaExcluir = id;
+    lastFocusedElement = document.activeElement;
+    modal.setAttribute('aria-hidden', 'false');
+    modal.style.display = 'flex';
+    btnYes.focus();
+    trapFocus(modal);
+  }
+
+  // Função para esconder modal e retornar foco ao último elemento focado
+  function hideModal() {
+    modal.setAttribute('aria-hidden', 'true');
+    modal.style.display = 'none';
+    produtoIdParaExcluir = null;
+    if (lastFocusedElement) lastFocusedElement.focus();
+  }
+
+  // Adiciona evento nos botões de excluir
+  document.querySelectorAll('.btn-excluir').forEach(btn => {
+    btn.addEventListener('click', () => {
+      showModal(btn.getAttribute('data-id'));
+    });
+  });
+
+  btnNo.addEventListener('click', hideModal);
+
+  // Fechar modal ao clicar fora da caixa modal
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      hideModal();
+    }
+  });
+
+  // Fechar modal com tecla ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') {
+      hideModal();
+    }
+  });
+
+  // Função para manter o foco dentro do modal (trap focus)
+  function trapFocus(element) {
+    const focusableEls = element.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusableEl = focusableEls[0];
+    const lastFocusableEl = focusableEls[focusableEls.length - 1];
+    element.addEventListener('keydown', function(e) {
+      const isTabPressed = (e.key === 'Tab' || e.keyCode === 9);
+      if (!isTabPressed) return;
+
+      if (e.shiftKey) { // shift + tab
+        if (document.activeElement === firstFocusableEl) {
+          lastFocusableEl.focus();
+          e.preventDefault();
+        }
+      } else { // tab
+        if (document.activeElement === lastFocusableEl) {
+          firstFocusableEl.focus();
+          e.preventDefault();
+        }
+      }
+    });
+  }
+
+  // --- Loader ---
+  const loader = document.getElementById('loader');
+
+  function showLoader() {
+    loader.style.display = 'block';
+  }
+  function hideLoader() {
+    loader.style.display = 'none';
+  }
+
+  // --- Feedback ---
+  const feedback = document.getElementById('feedbackMessage');
+
+  function showFeedback(message, type = 'success') {
+    feedback.textContent = message;
+    feedback.className = '';
+    feedback.classList.add(type);
+    feedback.style.display = 'block';
+    feedback.focus();
+    setTimeout(() => {
+      feedback.style.display = 'none';
+    }, 4000);
+  }
+
+  // --- Exclusão via Fetch API ---
+  btnYes.addEventListener('click', () => {
+    if (!produtoIdParaExcluir) return;
+
+    showLoader();
+    fetch("{% url 'excluir_produto' 0 %}".replace('0', produtoIdParaExcluir), {
+      method: 'DELETE',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Accept': 'application/json'
+      },
+      cache: 'no-store'
+    })
+    .then(response => {
+      hideLoader();
+      if (response.ok || response.status === 204) {
+        showFeedback('Produto excluído com sucesso.', 'success');
+        hideModal();
+        // Remover card da lista
+        const card = document.querySelector(`.btn-excluir[data-id="${produtoIdParaExcluir}"]`).closest('.card');
+        if(card) card.remove();
+      } else {
+        return response.json().then(data => {
+          throw new Error(data.detail || 'Erro ao excluir o produto.');
+        }).catch(() => {
+          throw new Error('Erro ao excluir o produto.');
+        });
+      }
+    })
+    .catch(error => {
+      hideLoader();
+      showFeedback(error.message, 'error');
+    });
+  });
+</script>
+
+{% endblock %}

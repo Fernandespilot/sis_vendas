@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Lista de Produtos{% endblock %}
+
+{% block content %}
+<h1>Produtos Disponíveis</h1>
+
+<div class="product-list">
+    {% if produtos %}
+        {% for produto in produtos %}
+            <div class="product-card">
+                {% if produto.imagem %}
+                    <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" class="product-image" />
+                {% else %}
+                    <div class="product-image placeholder">Sem imagem</div>
+                {% endif %}
+                <h2>{{ produto.nome }}</h2>
+                <p class="price">R$ {{ produto.preco|floatformat:2 }}</p>
+                <p class="stock">Estoque: {{ produto.estoque }}</p>
+                <button class="btn-add-cart" 
+                        data-id="{{ produto.id }}" 
+                        data-name="{{ produto.nome }}" 
+                        data-price="{{ produto.preco }}" 
+                        data-stock="{{ produto.estoque }}">
+                    Adicionar ao Carrinho
+                </button>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Nenhum produto disponível no momento.</p>
+    {% endif %}
+</div>
+
+<!-- Carrinho simplificado -->
+<div class="cart">
+    <h2>Carrinho</h2>
+    <ul id="cart-items">
+        <li>Seu carrinho está vazio.</li>
+    </ul>
+    <p id="cart-total"></p>
+</div>
+
+<style>
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.product-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.product-image {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+}
+
+.product-image.placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #eee;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.price {
+    font-weight: bold;
+    margin: 0.5rem 0 0.2rem;
+    font-size: 1.1rem;
+    color: #4CAF50;
+}
+
+.stock {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 1rem;
+}
+
+.btn-add-cart {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn-add-cart:hover {
+    background-color: #45a049;
+}
+
+.btn-add-cart.added {
+    background-color: #388E3C;
+}
+
+.cart {
+    margin-top: 3rem;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    max-width: 400px;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.05);
+}
+
+#cart-items {
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 1rem;
+}
+
+#cart-items li {
+    margin-bottom: 0.6rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-item-info {
+    flex-grow: 1;
+}
+
+.cart-item-controls button {
+    background: #4CAF50;
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    margin-left: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.cart-item-controls button:hover {
+    background-color: #45a049;
+}
+
+#cart-total {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const cartItems = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    const buttons = document.querySelectorAll('.btn-add-cart');
+    let cart = [];
+
+    function renderCart() {
+        if (cart.length === 0) {
+            cartItems.innerHTML = '<li>Seu carrinho está vazio.</li>';
+            cartTotal.textContent = '';
+            return;
+        }
+        cartItems.innerHTML = '';
+        let total = 0;
+        cart.forEach((item, index) => {
+            const li = document.createElement('li');
+
+            const infoDiv = document.createElement('div');
+            infoDiv.classList.add('cart-item-info');
+            infoDiv.textContent = `${item.name} - R$ ${item.price.toFixed(2)} (x${item.qty})`;
+
+            const controlsDiv = document.createElement('div');
+            controlsDiv.classList.add('cart-item-controls');
+
+            // botões diminuir, aumentar, remover
+            const btnDecrease = document.createElement('button');
+            btnDecrease.textContent = '-';
+            btnDecrease.classList.add('btn-decrease');
+            btnDecrease.dataset.index = index;
+
+            const btnIncrease = document.createElement('button');
+            btnIncrease.textContent = '+';
+            btnIncrease.classList.add('btn-increase');
+            btnIncrease.dataset.index = index;
+
+            const btnRemove = document.createElement('button');
+            btnRemove.textContent = '×';
+            btnRemove.classList.add('remove-item');
+            btnRemove.dataset.index = index;
+
+            controlsDiv.appendChild(btnDecrease);
+            controlsDiv.appendChild(btnIncrease);
+            controlsDiv.appendChild(btnRemove);
+
+            li.appendChild(infoDiv);
+            li.appendChild(controlsDiv);
+
+            cartItems.appendChild(li);
+            total += item.price * item.qty;
+        });
+        cartTotal.textContent = `Total: R$ ${total.toFixed(2)}`;
+    }
+
+    function addToCart(id, name, price, stock, button) {
+        const itemIndex = cart.findIndex(i => i.id === id);
+        if (itemIndex > -1) {
+            if (cart[itemIndex].qty < stock) {
+                cart[itemIndex].qty += 1;
+                button.classList.add('added');
+                setTimeout(() => button.classList.remove('added'), 1000);
+            } else {
+                alert(`Estoque insuficiente para adicionar mais unidades de "${name}".`);
+            }
+        } else {
+            if (stock > 0) {
+                cart.push({ id, name, price, qty: 1 });
+                button.classList.add('added');
+                setTimeout(() => button.classList.remove('added'), 1000);
+            } else {
+                alert(`Produto "${name}" está sem estoque.`);
+            }
+        }
+        renderCart();
+    }
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            const id = button.dataset.id;
+            const name = button.dataset.name;
+            const price = parseFloat(button.dataset.price);
+            const stock = parseInt(button.dataset.stock, 10);
+
+            addToCart(id, name, price, stock, button);
+        });
+    });
+
+    cartItems.addEventListener('click', (e) => {
+        const target = e.target;
+        const index = target.dataset.index;
+        if (!index) return;
+
+        const item = cart[index];
+        const stock = parseInt(document.querySelector(`.btn-add-cart[data-id="${item.id}"]`).dataset.stock, 10);
+
+        if (target.classList.contains('btn-increase')) {
+            if (item.qty < stock) {
+                item.qty += 1;
+                renderCart();
+            } else {
+                alert(`Estoque insuficiente para aumentar a quantidade de "${item.name}".`);
+            }
+        } else if (target.classList.contains('btn-decrease')) {
+            if (item.qty > 1) {
+                item.qty -= 1;
+            } else {
+                cart.splice(index, 1);
+            }
+            renderCart();
+        } else if (target.classList.contains('remove-item')) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+    });
+
+    renderCart();
+});
+</script>
+{% endblock %}

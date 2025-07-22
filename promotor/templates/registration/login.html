@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | SisVenda</title>
+    <style>
+        body {
+            background: #eafcf3;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 2.5rem 2.5rem 2rem 2.5rem;
+            max-width: 370px;
+            width: 100%;
+            text-align: center;
+        }
+        .login-logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2f3e46;
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+        .login-logo svg {
+            display: block;
+            margin: 0 auto 0.5rem auto;
+        }
+        .login-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .login-desc {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 1.2rem;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 1.1rem;
+        }
+        label {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #222;
+        }
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid #cfd8dc;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-top: 0.3rem;
+            background: #f7fafc;
+        }
+        .btn-login {
+            width: 100%;
+            background: #19916a;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.8rem 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-top: 0.7rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-login:hover {
+            background: #157a59;
+        }
+        .errorlist {
+            color: #d32f2f;
+            margin-bottom: 1rem;
+            list-style: none;
+            padding: 0;
+        }
+        .alert {
+            background: #ffeaea;
+            color: #d32f2f;
+            border-radius: 5px;
+            padding: 0.7em 1em;
+            margin-bottom: 1em;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="login-logo">
+            <svg width="38" height="38" fill="none" viewBox="0 0 38 38"><circle cx="19" cy="19" r="18" stroke="#19916a" stroke-width="2"/><text x="50%" y="55%" text-anchor="middle" fill="#19916a" font-size="16" font-family="Arial" dy=".3em">S</text></svg>
+            SisVenda
+        </div>
+        <div class="login-title">Login</div>
+        <div class="login-desc">Preencha os dados abaixo para entrar no sistema</div>
+        {% if form.errors %}
+            <div class="alert">Email ou senha inválidos.</div>
+        {% endif %}
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username">Email</label>
+                <input type="email" name="username" id="id_username" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="id_password">Senha</label>
+                <input type="password" name="password" id="id_password" required>
+            </div>
+            <button type="submit" class="btn-login">Entrar</button>
+        </form>
+    </div>
+</body>
+</html>
